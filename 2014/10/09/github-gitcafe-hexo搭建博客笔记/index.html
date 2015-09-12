@@ -1,0 +1,421 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+<meta name="baidu-site-verification" content="fJykSXfhPo" />
+  <meta charset="UTF-8">
+  
+    <title>github+gitcafe+hexo搭建博客笔记 | Joe&#39;s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Joe">
+    
+    <meta name="description" content="github与gitcafe rsa公钥
+按照官方的文档，生成rsa公钥，可以同时给github与gitcafe(需要账号信息一致）使用.使用git提交时可能会出现Error: Permission denied (publickey)错误，但使用’’’ssh -vT git@github.com’">
+    
+    
+    
+    
+    <link rel="alternative" href="http://neverjoe.com/atom.xml## RSS address." title="Joe&#39;s blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+</head>
+
+  <body>
+    <header>
+      <div>
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Joe&#39;s blog">Joe&#39;s blog</a></h1>
+				<h2 class="blog-motto"><a href="/">A pseudo coder!</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/About">About</a></li>
+					
+
+					<li><form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" name="q" id="search" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:neverjoe.com">
+					</form></li>
+				</ul>
+			</nav>
+</div>
+
+
+    </header>
+    <div id="wrap">
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+    <time datetime="2014-10-09T12:27:16.000Z" itemprop="datePublished">
+      <a href="/2014/10/09/github-gitcafe-hexo搭建博客笔记/" title="github+gitcafe+hexo搭建博客笔记" itemprop="url" class="article-time">10月 9 2014</a>
+    </time>
+
+  <h1 itemprop="name" class="article-name">
+    
+      <a href="/2014/10/09/github-gitcafe-hexo搭建博客笔记/" title="github+gitcafe+hexo搭建博客笔记" itemprop="url"><span>github+gitcafe+hexo搭建博客笔记</span></a>
+  </h1>
+</header>
+
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#github与gitcafe_rsa公钥"><span class="toc-number">1.</span> <span class="toc-text">github与gitcafe rsa公钥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#github与gitcafe_pages使用"><span class="toc-number">2.</span> <span class="toc-text">github与gitcafe pages使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hexo_使用"><span class="toc-number">3.</span> <span class="toc-text">Hexo 使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#域名及dns"><span class="toc-number">4.</span> <span class="toc-text">域名及dns</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="github与gitcafe_rsa公钥">github与gitcafe rsa公钥</h2>
+<p>按照<a href="https://help.github.com/articles/generating-ssh-keys/" target="_blank" rel="external">官方的文档</a>，生成rsa公钥，可以同时给github与gitcafe(需要账号信息一致）使用.<br><br>使用git提交时可能会出现Error: Permission denied (publickey)错误，但使用’’’ssh -vT git@github.com’’’时可能是因为生成ssh rsa时没有使用sudo，而使用git时若使用sudo了，则调用/root/下的rsa公钥.<br>解决方案:使用sudo生成rsa公钥!详解可以参考<a href="https://help.github.com/articles/error-permission-denied-publickey/" target="_blank" rel="external">官网文档</a><br></p>
+<h2 id="github与gitcafe_pages使用">github与gitcafe pages使用</h2>
+<p>把博客部署到github与gitcafe上这样就免去了购置vps的费用！<br><br>github与gitcafe部署上略有差别</p>
+<ol>
+<li>github上建立一个yourid.github.com的repo,而gitcafe为yourid.</li>
+<li>branch没有现在，而gitcafe上必须为gitcafe-pages</li>
+<li>gitcafe自定义域名的方式绑定域名，而github需要一个CNAME文件．同时gitcafe还支持多域名绑定.<br></li>
+</ol>
+<p>下面是gitcafe部署方法:<br></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">cd yourid/pages</div><div class="line">git init</div><div class="line">git <span class="keyword">add</span> .</div><div class="line">git remote <span class="keyword">add</span> origin git@gitcafe.com:yourid/yourid.git</div><div class="line">git checkout -b gitcafe-pages</div><div class="line">git <span class="keyword">push</span> origin gitcafe-pages</div></pre></td></tr></table></figure>
+
+<h2 id="Hexo_使用">Hexo 使用</h2>
+<ol>
+<li>多次渲染生成静态博客时，使用</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="title">hexo</span> clean</div></pre></td></tr></table></figure>
+
+<ol>
+<li>出现提交问题时，使用</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="title">rm</span> -rf .deploy/</div></pre></td></tr></table></figure>
+
+<ol>
+<li>使用复合命令</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment">hexo</span> <span class="comment">g</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">d</span></div><div class="line"><span class="comment">hexo</span> <span class="comment">s</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">g</span></div></pre></td></tr></table></figure>
+
+<h2 id="域名及dns">域名及dns</h2>
+<p>域名:</p>
+<ol>
+<li>上<a href="www.godaddy.com">godaddy</a>买域名</li>
+<li>在狗爹上只是买了域名服务，想加速国内访问，还得弄个国内的dns服务．我用的<a href="https://yunjiasu.baidu.com" target="_blank" rel="external">百度云加速</a>  </li>
+<li>让搜索引擎发现你的博客-<a href="http://zhanzhang.baidu.com/sitesubmit/index" target="_blank" rel="external">baidu网址提交</a>,<a href="https://www.google.com/webmasters/tools/submit-url?pli=1" target="_blank" rel="external">google网址提交</a></li>
+<li>图床，必须使用<a href="https://portal.qiniu.com/signup?code=3lewblh9ozbrm" target="_blank" rel="external">七牛</a>.免费10G</li>
+</ol>
+<p>dns设置建议:</p>
+<ol>
+<li>默认设置为gitcafe</li>
+<li>国外设置为github</li>
+<li>添加一些单独的运营商线路加速访问.</li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/学习笔记/">学习笔记</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Hexo/">Hexo</a>
+  </div>
+
+
+
+
+<div class="article-share" id="share">
+
+  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script>
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+1410439286108384" charset="utf-8"></script>
+
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/10/14/利用github学生套件获取digitalocean-vps优惠/" title="github学生套件获取digitalocean vps优惠">
+  <strong>上一篇：</strong><br/>
+  <span>
+  github学生套件获取digitalocean vps优惠</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/10/01/my-markdown-syntax/"  title="my-markdown-syntax">
+ <strong>下一篇：</strong><br/> 
+ <span>my-markdown-syntax
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#github与gitcafe_rsa公钥"><span class="toc-number">1.</span> <span class="toc-text">github与gitcafe rsa公钥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#github与gitcafe_pages使用"><span class="toc-number">2.</span> <span class="toc-text">github与gitcafe pages使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hexo_使用"><span class="toc-number">3.</span> <span class="toc-text">Hexo 使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#域名及dns"><span class="toc-number">4.</span> <span class="toc-text">域名及dns</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/SQL-on-Hadoop/" title="SQL-on-Hadoop">SQL-on-Hadoop<sup>1</sup></a></li>
+		
+			<li><a href="/categories/学习笔记/" title="学习笔记">学习笔记<sup>5</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		
+			<li><a href="/tags/impala/" title="impala">impala<sup>1</sup></a></li>
+		
+			<li><a href="/tags/markdown/" title="markdown">markdown<sup>1</sup></a></li>
+		
+			<li><a href="/tags/vps/" title="vps">vps<sup>1</sup></a></li>
+		
+			<li><a href="/tags/算法与数据结构/" title="算法与数据结构">算法与数据结构<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+      <li><a href="http://yangjian.me" target="_blank" title="YangJian">Alimon's Blog</a></li>
+             <li><a href="http://ibruce.info" target="_blank" title="ibruce">ibruce's Blog</a></li> 
+      <li><a href="http://neverjoe.github.io" target="_blank" title="neverjoe">neverjoe's Blog</a></li>
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="http://neverjoe.com/atom.xml## RSS address." target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+</div>
+    <footer><div id="footer" >
+	
+    <div class="social-font" class="clearfix">
+        
+        <a href="http://weibo.com/2655381101" target="_blank" class="icon-weibo" title="weibo"></a>
+        
+        
+        <a href="https://github.com/neverjoe" target="_blank" class="icon-github" title="github"></a>
+        
+        
+        
+        
+        
+        
+        <a href="mailto:tq0317@gmail.com" target="_blank" class="icon-email" title="Email Me"></a>
+        
+    </div>
+	<section class="info">
+		<p class="l1">
+            This is Joe&#39;s Personal Blog.
+        </p>
+            <!-- <br/> -->
+        <p class="l2">
+			A future omnivorous bipedal pseudo full stack engineer.
+        </p>
+	</section>
+	 
+		<p class="copyright">Powered by <a href="http://zespia.tw/hexo/" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/neverjoe/hexo-theme-neverjoe" target="_blank" title="hexo-theme-neverjoe">never Joe</a> © 2015
+		
+		<a href="http://neverjoe.com/about" target="_blank" title="Joe">Joe</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize();
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+      
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+});
+</script>
+
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-55642872-1', auto);  
+ga('send', 'pageview');
+</script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+  </body>
+</html>
+
+
+<a href="https://github.com/neverjoe" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="/img/forkme_right_white_ffffff.png" alt="Fork me on GitHub"></a>
