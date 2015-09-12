@@ -4,7 +4,7 @@
   <subtitle><![CDATA[A pseudo coder!]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://neverjoe.com/"/>
-  <updated>2015-09-12T08:13:15.169Z</updated>
+  <updated>2015-09-12T09:08:15.412Z</updated>
   <id>http://neverjoe.com/</id>
   
   <author>
@@ -83,11 +83,63 @@
     <link href="http://neverjoe.com/2015/09/08/impala%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/"/>
     <id>http://neverjoe.com/2015/09/08/impala源码安装笔记/</id>
     <published>2015-09-08T02:30:29.000Z</published>
-    <updated>2015-09-08T02:30:29.000Z</updated>
-    <content type="html"><![CDATA[]]></content>
+    <updated>2015-09-12T09:08:11.000Z</updated>
+    <content type="html"><![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
+<h2 id="环境">环境</h2>
+<ul>
+<li><strong>ubuntu14.04.1</strong> 64bit, 16G Memory, Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz, 1TB disk</li>
+<li>gcc/g++ 4.8.2</li>
+</ul>
+<h2 id="准备相关依赖">准备相关依赖</h2>
+<h3 id="java">java</h3>
+<p>安装java最新版即可。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">sudo <span class="built_in">add</span>-apt-repository <span class="keyword">pp</span><span class="variable">a:webupd8team</span>/java -<span class="keyword">y</span></div><div class="line">sudo apt-<span class="built_in">get</span> <span class="keyword">update</span> -<span class="keyword">y</span></div><div class="line"></div><div class="line"># Will have <span class="keyword">to</span> agree <span class="keyword">to</span> License</div><div class="line">sudo apt-<span class="built_in">get</span> install oracle-jdk7-installer -<span class="keyword">y</span></div></pre></td></tr></table></figure>
+
+<h3 id="postgresql_&amp;&amp;_boost">postgresql &amp;&amp; boost</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo apt-<span class="built_in">get</span> install git build-essential cmake bison flex pkg-config libsasl2-dev autoconf automake libtool maven subversion doxygen libbz2-dev zlib1g-dev <span class="keyword">python</span>-pip <span class="keyword">python</span>-setuptools <span class="keyword">python</span>-dev libssl-dev libboost-<span class="keyword">all</span>-dev postgresql liblzo2-dev lzop -<span class="keyword">y</span></div><div class="line">sudo pip install allpairs pytest pytest-xdist paramiko texttable prettytable sqlparse psutil==<span class="number">0.7</span>.<span class="number">1</span> pywebhdfs gitpython jenkinsapi</div></pre></td></tr></table></figure>
+
+<h4 id="配置postgresql">配置postgresql</h4>
+<h5 id="postgresql认证">postgresql认证</h5>
+<p>编辑 /etc/postgresql/*/main/pg_hba.conf 文件。由于源码中默认user为hiveuser，包括metastore在内的user均为hiveuser，password均为‘password’。<br><br>而</p>
+<figure class="highlight whoami```不是hiveuser则无法通过postgresql的验证，需要修改上述文件。<br/>"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">* 修改前：</div><div class="line"># <span class="keyword">TYPE</span> DATABASE USER ADDRESS <span class="function"><span class="keyword">METHOD</span></span></div><div class="line">  <span class="title">local</span> <span class="title">all</span> <span class="title">all</span> <span class="title">peer</span></div><div class="line">* 修改后：</div><div class="line"># <span class="title">TYPE</span> <span class="title">DATABASE</span> <span class="title">USER</span> <span class="title">ADDRESS</span> <span class="title">METHOD</span></div><div class="line">  <span class="title">local</span> <span class="title">all</span> <span class="title">all</span> <span class="title">peer</span> <span class="title">map</span>=<span class="title">myHiveMap</span></div><div class="line"></div><div class="line">其中需要在/<span class="title">etc</span>/<span class="title">postgresql</span>/*/<span class="title">main</span>/<span class="title">pg_ident</span>.<span class="title">conf</span>&lt;<span class="title">br</span>/&gt;</div><div class="line">文件最后加入一行 &lt;<span class="title">br</span>/&gt;</div><div class="line"> <span class="title">myHivemap</span> <span class="title">your</span>’<span class="title">whoami</span>’ <span class="title">hiveuser</span>&lt;<span class="title">br</span>/&gt;</div><div class="line">重启<span class="title">postgresql</span>&lt;<span class="title">br</span>/&gt;</div></pre></td></tr></table></figure>
+
+<p>sudo service postgresql restart</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#####postgresql中为metastore建立用户</span></div></pre></td></tr></table></figure>
+
+<p>sudo -u postgres psql postgres<br>postgres=# CREATE ROLE hiveuser LOGIN PASSWORD ‘password’;<br>postgres=# ALTER ROLE hiveuser WITH CREATEDB;</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">####boost库配置</span></div><div class="line">ubuntu中自带boost库，而impala需要用到相关扩展库。</div></pre></td></tr></table></figure>
+
+<p>cd /usr/lib/x86_64-linux-gnu<br>sudo ln -s libboost_filesystem.so libboost_filesystem-mt.so<br>sudo ln -s libboost_filesystem.a libboost_filesystem-mt.a<br>sudo ln -s libboost_system.so libboost_system-mt.so<br>sudo ln -s libboost_system.a libboost_system-mt.a<br>sudo ln -s libboost_regex.so libboost_regex-mt.so<br>sudo ln -s libboost_regex.a libboost_regex-mt.a</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###llvm</span></div></pre></td></tr></table></figure>
+
+<p>wget <a href="http://llvm.org/releases/3.3/llvm-3.3.src.tar.gz" target="_blank" rel="external">http://llvm.org/releases/3.3/llvm-3.3.src.tar.gz</a><br>tar xvf llvm-3.3.src.tar.gz<br>cd llvm-3.3.src/tools/<br>svn co <a href="http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_33/final/" target="_blank" rel="external">http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_33/final/</a> clang<br>cd ../projects/<br>svn co <a href="http://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_33/final" target="_blank" rel="external">http://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_33/final</a> compiler-rt<br>cd ..<br>./configure —with-pic<br>make -j4 REQUIRES_RTTI=1<br>sudo make install</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###Maven 3</span></div></pre></td></tr></table></figure>
+
+<p>wget <a href="http://www.interior-dsgn.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz" target="_blank" rel="external">http://www.interior-dsgn.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz</a><br>tar xvf apache-maven-3.0.5-bin.tar.gz &amp;&amp; sudo mv apache-maven-3.0.5 /usr/local</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###bashrc</span></div></pre></td></tr></table></figure>
+
+<p>export JAVA_HOME=/usr/lib/jvm/java-7-oracle<br>export IMPALA_HOME=<path to="" impala=""><br>export BOOST_LIBRARYDIR=/usr/lib/x86_64-linux-gnu<br>export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu<br>export LC_ALL=”en_US.UTF-8”<br>export M2_HOME=/usr/local/apache-maven-3.0.5<br>export M2=$M2_HOME/bin<br>export PATH=$M2:$PATH</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###hdfs domain sockets</span></div></pre></td></tr></table></figure>
+
+<p>sudo mkdir /var/lib/hadoop-hdfs/<br>sudo chown <user> /var/lib/hadoop-hdfs/</user></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###ssh password-less fro HBase</span></div></pre></td></tr></table></figure>
+
+<p>ssh-keygen -t dsa</p>
+<h1 id="Do_not_type_in_any_passkey-_Just_press_enter-">Do not type in any passkey. Just press enter.</h1>
+<p>cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys</p>
+<h2 id="```">```</h2>
+<p>以上完成了源码安装的准备事项。</p>
+]]></content>
     <summary type="html">
-    <![CDATA[]]>
+    <![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
+<h2 id="环境">环境</h2>
+<ul>
+<li><strong>ubuntu14.04.1</strong>]]>
     </summary>
+    
+      <category term="impala" scheme="http://neverjoe.com/tags/impala/"/>
+    
+      <category term="SQL-on-Hadoop" scheme="http://neverjoe.com/categories/SQL-on-Hadoop/"/>
     
   </entry>
   
