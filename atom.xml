@@ -4,7 +4,7 @@
   <subtitle><![CDATA[A pseudo coder!]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://neverjoe.com/"/>
-  <updated>2015-09-13T01:20:16.560Z</updated>
+  <updated>2015-09-13T01:21:10.437Z</updated>
   <id>http://neverjoe.com/</id>
   
   <author>
@@ -83,7 +83,7 @@
     <link href="http://neverjoe.com/2015/09/08/impala%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/"/>
     <id>http://neverjoe.com/2015/09/08/impala源码安装笔记/</id>
     <published>2015-09-08T02:30:29.000Z</published>
-    <updated>2015-09-13T01:19:39.000Z</updated>
+    <updated>2015-09-13T01:21:07.000Z</updated>
     <content type="html"><![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
 <h2 id="环境">环境</h2>
 <ul>
