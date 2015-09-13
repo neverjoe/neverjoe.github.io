@@ -4,7 +4,7 @@
   <subtitle><![CDATA[A pseudo coder!]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://neverjoe.com/"/>
-  <updated>2015-09-13T01:17:55.660Z</updated>
+  <updated>2015-09-13T01:19:45.243Z</updated>
   <id>http://neverjoe.com/</id>
   
   <author>
@@ -83,7 +83,7 @@
     <link href="http://neverjoe.com/2015/09/08/impala%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/"/>
     <id>http://neverjoe.com/2015/09/08/impala源码安装笔记/</id>
     <published>2015-09-08T02:30:29.000Z</published>
-    <updated>2015-09-13T01:15:35.000Z</updated>
+    <updated>2015-09-13T01:19:39.000Z</updated>
     <content type="html"><![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
 <h2 id="环境">环境</h2>
 <ul>
@@ -151,9 +151,10 @@
 <figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">相关日志在<span class="variable">${IMPALA_HOME}</span>/cluster_logs/中。</div><div class="line"><span class="comment">####启动impala</span></div></pre></td></tr></table></figure>
 
 <p>${IMPALA_HOME}/bin/start-impala-cluster.py</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">####测试impala</span></div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">####测试impala</span></div></pre></td></tr></table></figure>
 
-<p>$cd ${IMPALA_HOME}<br>$impala-shell.sh -q”SELECT version()”<br>```<br>如下显示，则一切正常。<br><br>    Starting Impala Shell without Kerberos authentication<br>    Connected to localhost:21000<br>    Server version: impalad version 2.2.0-INTERNAL DEBUG (build 47c90e004aecb928a37b926080098d30b96b4330)<br>    Query: select version()<br>    +———————————————————————————————————————————-+<br>    | version()                                                                             |<br>    +———————————————————————————————————————————-+<br>    | impalad version 2.2.0-INTERNAL DEBUG (build 47c90e004aecb928a37b926080098d30b96b4330) |<br>    | Built on Sun, Mar 22 15:22:57 PDT 2015                                                |<br>    +———————————————————————————————————————————-+<br>    Fetched 1 row(s) in 0.05s</p>
+<p>$cd ${IMPALA_HOME}<br>$impala-shell.sh -q”SELECT version()”<br>```</p>
+<p>如下显示，则一切正常。<br><br>    Starting Impala Shell without Kerberos authentication<br>    Connected to localhost:21000<br>    Server version: impalad version 2.2.0-INTERNAL DEBUG (build 47c90e004aecb928a37b926080098d30b96b4330)<br>    Query: select version()<br>    +———————————————————————————————————————————-+<br>    | version()                                                                             |<br>    +———————————————————————————————————————————-+<br>    | impalad version 2.2.0-INTERNAL DEBUG (build 47c90e004aecb928a37b926080098d30b96b4330) |<br>    | Built on Sun, Mar 22 15:22:57 PDT 2015                                                |<br>    +———————————————————————————————————————————-+<br>    Fetched 1 row(s) in 0.05s</p>
 ]]></content>
     <summary type="html">
     <![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
