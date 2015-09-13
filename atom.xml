@@ -4,7 +4,7 @@
   <subtitle><![CDATA[A pseudo coder!]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://neverjoe.com/"/>
-  <updated>2015-09-13T01:25:30.187Z</updated>
+  <updated>2015-09-13T01:29:48.525Z</updated>
   <id>http://neverjoe.com/</id>
   
   <author>
@@ -83,7 +83,7 @@
     <link href="http://neverjoe.com/2015/09/08/impala%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/"/>
     <id>http://neverjoe.com/2015/09/08/impala源码安装笔记/</id>
     <published>2015-09-08T02:30:29.000Z</published>
-    <updated>2015-09-13T01:25:25.000Z</updated>
+    <updated>2015-09-13T01:29:45.000Z</updated>
     <content type="html"><![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
 <h2 id="环境">环境</h2>
 <ul>
@@ -102,10 +102,8 @@
 <h5 id="postgresql认证">postgresql认证</h5>
 <p>编辑 /etc/postgresql/*/main/pg_hba.conf 文件。由于源码中默认user为hiveuser，包括metastore在内的user均为hiveuser，password均为‘password’。<br><br>而’whoami’不是hiveuser则无法通过postgresql的验证，需要修改上述文件。<br></p>
 <ul>
-<li>修改前：<h1 id="TYPE_DATABASE_USER_ADDRESS_METHOD">TYPE DATABASE USER ADDRESS METHOD</h1>
-local all all peer</li>
-<li>修改后：<h1 id="TYPE_DATABASE_USER_ADDRESS_METHOD-1">TYPE DATABASE USER ADDRESS METHOD</h1>
-local all all peer map=myHiveMap</li>
+<li>修改前：<br># TYPE DATABASE USER ADDRESS METHOD<br>local all all peer</li>
+<li>修改后：<br># TYPE DATABASE USER ADDRESS METHOD<br>local all all peer map=myHiveMap</li>
 </ul>
 <p>其中需要在/etc/postgresql/*/main/pg_ident.conf<br><br>文件最后加入一行 <br><br> myHivemap your’whoami’ hiveuser<br><br>重启postgresql<br></p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">sudo</span> service postgresql restart</div></pre></td></tr></table></figure>
