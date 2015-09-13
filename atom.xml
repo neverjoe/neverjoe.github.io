@@ -4,7 +4,7 @@
   <subtitle><![CDATA[A pseudo coder!]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://neverjoe.com/"/>
-  <updated>2015-09-13T01:21:10.437Z</updated>
+  <updated>2015-09-13T01:25:30.187Z</updated>
   <id>http://neverjoe.com/</id>
   
   <author>
@@ -83,7 +83,7 @@
     <link href="http://neverjoe.com/2015/09/08/impala%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/"/>
     <id>http://neverjoe.com/2015/09/08/impala源码安装笔记/</id>
     <published>2015-09-08T02:30:29.000Z</published>
-    <updated>2015-09-13T01:21:07.000Z</updated>
+    <updated>2015-09-13T01:25:25.000Z</updated>
     <content type="html"><![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
 <h2 id="环境">环境</h2>
 <ul>
@@ -100,60 +100,72 @@
 
 <h4 id="配置postgresql">配置postgresql</h4>
 <h5 id="postgresql认证">postgresql认证</h5>
-<p>编辑 /etc/postgresql/*/main/pg_hba.conf 文件。由于源码中默认user为hiveuser，包括metastore在内的user均为hiveuser，password均为‘password’。<br><br>而</p>
-<figure class="highlight whoami```不是hiveuser则无法通过postgresql的验证，需要修改上述文件。<br/>"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">* 修改前：</div><div class="line"># <span class="keyword">TYPE</span> DATABASE USER ADDRESS <span class="function"><span class="keyword">METHOD</span></span></div><div class="line">  <span class="title">local</span> <span class="title">all</span> <span class="title">all</span> <span class="title">peer</span></div><div class="line">* 修改后：</div><div class="line"># <span class="title">TYPE</span> <span class="title">DATABASE</span> <span class="title">USER</span> <span class="title">ADDRESS</span> <span class="title">METHOD</span></div><div class="line">  <span class="title">local</span> <span class="title">all</span> <span class="title">all</span> <span class="title">peer</span> <span class="title">map</span>=<span class="title">myHiveMap</span></div><div class="line"></div><div class="line">其中需要在/<span class="title">etc</span>/<span class="title">postgresql</span>/*/<span class="title">main</span>/<span class="title">pg_ident</span>.<span class="title">conf</span>&lt;<span class="title">br</span>/&gt;</div><div class="line">文件最后加入一行 &lt;<span class="title">br</span>/&gt;</div><div class="line"> <span class="title">myHivemap</span> <span class="title">your</span>’<span class="title">whoami</span>’ <span class="title">hiveuser</span>&lt;<span class="title">br</span>/&gt;</div><div class="line">重启<span class="title">postgresql</span>&lt;<span class="title">br</span>/&gt;</div></pre></td></tr></table></figure>
+<p>编辑 /etc/postgresql/*/main/pg_hba.conf 文件。由于源码中默认user为hiveuser，包括metastore在内的user均为hiveuser，password均为‘password’。<br><br>而’whoami’不是hiveuser则无法通过postgresql的验证，需要修改上述文件。<br></p>
+<ul>
+<li>修改前：<h1 id="TYPE_DATABASE_USER_ADDRESS_METHOD">TYPE DATABASE USER ADDRESS METHOD</h1>
+local all all peer</li>
+<li>修改后：<h1 id="TYPE_DATABASE_USER_ADDRESS_METHOD-1">TYPE DATABASE USER ADDRESS METHOD</h1>
+local all all peer map=myHiveMap</li>
+</ul>
+<p>其中需要在/etc/postgresql/*/main/pg_ident.conf<br><br>文件最后加入一行 <br><br> myHivemap your’whoami’ hiveuser<br><br>重启postgresql<br></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">sudo</span> service postgresql restart</div></pre></td></tr></table></figure>
 
-<p>sudo service postgresql restart</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">#####postgresql中为metastore建立用户</span></div></pre></td></tr></table></figure>
+<h5 id="postgresql中为metastore建立用户">postgresql中为metastore建立用户</h5>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">sudo -u postgres psql postgres</div><div class="line">postgres=# <span class="operator"><span class="keyword">CREATE</span> ROLE hiveuser LOGIN <span class="keyword">PASSWORD</span> ‘<span class="keyword">password</span>’;</span></div><div class="line">postgres=# <span class="operator"><span class="keyword">ALTER</span> ROLE hiveuser <span class="keyword">WITH</span> CREATEDB;</span></div></pre></td></tr></table></figure>
 
-<p>sudo -u postgres psql postgres<br>postgres=# CREATE ROLE hiveuser LOGIN PASSWORD ‘password’;<br>postgres=# ALTER ROLE hiveuser WITH CREATEDB;</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">####boost库配置</span></div><div class="line">ubuntu中自带boost库，而impala需要用到相关扩展库。</div></pre></td></tr></table></figure>
+<h4 id="boost库配置">boost库配置</h4>
+<p>ubuntu中自带boost库，而impala需要用到相关扩展库。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> /usr/lib/x86_64-linux-gnu</div><div class="line"><span class="built_in">sudo</span> ln <span class="operator">-s</span> libboost_filesystem.so libboost_filesystem-mt.so</div><div class="line"><span class="built_in">sudo</span> ln <span class="operator">-s</span> libboost_filesystem.a libboost_filesystem-mt.a</div><div class="line"><span class="built_in">sudo</span> ln <span class="operator">-s</span> libboost_system.so libboost_system-mt.so</div><div class="line"><span class="built_in">sudo</span> ln <span class="operator">-s</span> libboost_system.a libboost_system-mt.a</div><div class="line"><span class="built_in">sudo</span> ln <span class="operator">-s</span> libboost_regex.so libboost_regex-mt.so</div><div class="line"><span class="built_in">sudo</span> ln <span class="operator">-s</span> libboost_regex.a libboost_regex-mt.a</div></pre></td></tr></table></figure>
 
-<p>cd /usr/lib/x86_64-linux-gnu<br>sudo ln -s libboost_filesystem.so libboost_filesystem-mt.so<br>sudo ln -s libboost_filesystem.a libboost_filesystem-mt.a<br>sudo ln -s libboost_system.so libboost_system-mt.so<br>sudo ln -s libboost_system.a libboost_system-mt.a<br>sudo ln -s libboost_regex.so libboost_regex-mt.so<br>sudo ln -s libboost_regex.a libboost_regex-mt.a</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###llvm</span></div></pre></td></tr></table></figure>
+<h3 id="llvm">llvm</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">wget <span class="symbol">http:</span>/<span class="regexp">/llvm.org/releases</span><span class="regexp">/3.3/llvm</span>-<span class="number">3.3</span>.src.tar.gz</div><div class="line">tar xvf llvm-<span class="number">3.3</span>.src.tar.gz</div><div class="line">cd llvm-<span class="number">3.3</span>.src/tools/</div><div class="line">svn co <span class="symbol">http:</span>/<span class="regexp">/llvm.org/svn</span><span class="regexp">/llvm-project/cfe</span><span class="regexp">/tags/</span><span class="constant">RELEASE_33</span>/final/ clang</div><div class="line">cd ../projects/</div><div class="line">svn co <span class="symbol">http:</span>/<span class="regexp">/llvm.org/svn</span><span class="regexp">/llvm-project/compiler</span>-rt/tags/<span class="constant">RELEASE_33</span>/final compiler-rt</div><div class="line">cd ..</div><div class="line">./configure --with-pic</div><div class="line">make -j4 <span class="constant">REQUIRES_RTTI</span>=<span class="number">1</span></div><div class="line">sudo make install</div></pre></td></tr></table></figure>
 
-<p>wget <a href="http://llvm.org/releases/3.3/llvm-3.3.src.tar.gz" target="_blank" rel="external">http://llvm.org/releases/3.3/llvm-3.3.src.tar.gz</a><br>tar xvf llvm-3.3.src.tar.gz<br>cd llvm-3.3.src/tools/<br>svn co <a href="http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_33/final/" target="_blank" rel="external">http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_33/final/</a> clang<br>cd ../projects/<br>svn co <a href="http://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_33/final" target="_blank" rel="external">http://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_33/final</a> compiler-rt<br>cd ..<br>./configure —with-pic<br>make -j4 REQUIRES_RTTI=1<br>sudo make install</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###Maven 3</span></div></pre></td></tr></table></figure>
+<h3 id="Maven_3">Maven 3</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">wget <span class="symbol">http:</span>/<span class="regexp">/www.interior-dsgn.com/apache</span><span class="regexp">/maven/maven</span>-<span class="number">3</span>/<span class="number">3.0</span>.<span class="number">5</span>/binaries/apache-maven-<span class="number">3.0</span>.<span class="number">5</span>-bin.tar.gz</div><div class="line">tar xvf apache-maven-<span class="number">3.0</span>.<span class="number">5</span>-bin.tar.gz && sudo mv apache-maven-<span class="number">3.0</span>.<span class="number">5</span> /usr/local</div></pre></td></tr></table></figure>
 
-<p>wget <a href="http://www.interior-dsgn.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz" target="_blank" rel="external">http://www.interior-dsgn.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz</a><br>tar xvf apache-maven-3.0.5-bin.tar.gz &amp;&amp; sudo mv apache-maven-3.0.5 /usr/local</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">###bashrc</span></div></pre></td></tr></table></figure>
+<h3 id="bashrc">bashrc</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">export</span> JAVA_HOME=/usr/lib/jvm/java-<span class="number">7</span>-oracle</div><div class="line"><span class="keyword">export</span> IMPALA_HOME=&lt;path to Impala&gt;</div><div class="line"><span class="keyword">export</span> BOOST_LIBRARYDIR=/usr/lib/x86_64-linux-gnu</div><div class="line"><span class="keyword">export</span> LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu</div><div class="line"><span class="keyword">export</span> LC_ALL=”en_US.UTF-<span class="number">8</span>”</div><div class="line"><span class="keyword">export</span> M2_HOME=/usr/local/apache-maven-<span class="number">3.0</span>.<span class="number">5</span></div><div class="line"><span class="keyword">export</span> M2=<span class="variable">$M2_HOME</span>/bin</div><div class="line"><span class="keyword">export</span> PATH=<span class="variable">$M2</span>:<span class="variable">$PATH</span></div></pre></td></tr></table></figure>
 
-<p>export JAVA_HOME=/usr/lib/jvm/java-7-oracle<br>export IMPALA_HOME=<path to="" impala=""><br>export BOOST_LIBRARYDIR=/usr/lib/x86_64-linux-gnu<br>export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu<br>export LC_ALL=”en_US.UTF-8”<br>export M2_HOME=/usr/local/apache-maven-3.0.5<br>export M2=$M2_HOME/bin<br>export PATH=$M2:$PATH</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">###hdfs domain sockets</span></div></pre></td></tr></table></figure>
+<h3 id="hdfs_domain_sockets">hdfs domain sockets</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo mkdir <span class="regexp">/var/</span>lib<span class="regexp">/hadoop-hdfs/</span></div><div class="line">sudo chown &lt;user&gt; <span class="regexp">/var/</span>lib<span class="regexp">/hadoop-hdfs/</span>&lt;<span class="regexp">/user&gt;</span></div></pre></td></tr></table></figure>
 
-<p>sudo mkdir /var/lib/hadoop-hdfs/<br>sudo chown <user> /var/lib/hadoop-hdfs/</user></p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">###ssh password-less for HBase</span></div></pre></td></tr></table></figure>
+<h3 id="ssh_password-less_for_HBase">ssh password-less for HBase</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="input"><span class="prompt">ssh-keygen -t dsa</span></span></div><div class="line"># Do not type in any passkey. Just press enter.</div><div class="line">cat ~/.ssh/id_dsa.pub &gt;&gt; ~<span class="regexp">/.ssh/authorized</span>_keys</div></pre></td></tr></table></figure>
 
-<p>ssh-keygen -t dsa</p>
-<h1 id="Do_not_type_in_any_passkey-_Just_press_enter-">Do not type in any passkey. Just press enter.</h1>
-<p>cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">-----</div><div class="line">以上完成了源码安装的准备事项。&lt;br/&gt;</div><div class="line"><span class="preprocessor">##源码编译</span></div><div class="line"><span class="preprocessor">###下载源码</span></div></pre></td></tr></table></figure>
+<hr>
+<p>以上完成了源码安装的准备事项。<br></p>
+<h2 id="源码编译">源码编译</h2>
+<h3 id="下载源码">下载源码</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git clone  http<span class="variable">s:</span>//github.<span class="keyword">com</span>/cloudera/Impala.git</div></pre></td></tr></table></figure>
 
-<p>git clone  <a href="https://github.com/cloudera/Impala.git" target="_blank" rel="external">https://github.com/cloudera/Impala.git</a></p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###检查编译环境变量</span></div></pre></td></tr></table></figure>
+<h3 id="检查编译环境变量">检查编译环境变量</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> <span class="variable">${IMPALA_HOME}</span></div><div class="line"><span class="built_in">source</span> bin/impala-config.sh</div></pre></td></tr></table></figure>
 
-<p>cd ${IMPALA_HOME}<br>source bin/impala-config.sh</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">####格式化HIVE Metastore && HDFS　</span></div><div class="line">第一次编译的时，需要清除编译环境和格式化Metastore和HDFS namenode.</div></pre></td></tr></table></figure>
+<h4 id="格式化HIVE_Metastore_&amp;&amp;_HDFS_">格式化HIVE Metastore &amp;&amp; HDFS　</h4>
+<p>第一次编译的时，需要清除编译环境和格式化Metastore和HDFS namenode.</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">${IMPALA_HOME}</span>/buildall.sh -noclean -skiptests -build_shared_libs -<span class="keyword">format</span></div></pre></td></tr></table></figure>
 
-<p>${IMPALA_HOME}/buildall.sh -noclean -skiptests -build_shared_libs -format</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###编译</span></div><div class="line"><span class="preprocessor">####整体编译</span></div></pre></td></tr></table></figure>
+<h3 id="编译">编译</h3>
+<h4 id="整体编译">整体编译</h4>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">${IMPALA_HOME}</span>/buildall.sh -skiptests -build_shared_libs</div></pre></td></tr></table></figure>
 
-<p>${IMPALA_HOME}/buildall.sh -skiptests -build_shared_libs</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">####单独编译backend</span></div></pre></td></tr></table></figure>
+<h4 id="单独编译backend">单独编译backend</h4>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$.</span>{<span class="constant">IMPALA_HOME</span>}/bin/make_debug.sh [-notests] -build_shared_libs</div></pre></td></tr></table></figure>
 
-<p>$.{IMPALA_HOME}/bin/make_debug.sh [-notests] -build_shared_libs</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">####单独编译frontend</span></div></pre></td></tr></table></figure>
+<h4 id="单独编译frontend">单独编译frontend</h4>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> <span class="variable">${IMPALA_HOME}</span>/fe && mvn clean package dependency:copy-dependencies -DskipTests=<span class="literal">true</span></div></pre></td></tr></table></figure>
 
-<p>cd ${IMPALA_HOME}/fe &amp;&amp; mvn clean package dependency:copy-dependencies -DskipTests=true</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###测试伪分布集群</span></div><div class="line"><span class="preprocessor">####启动impala的相关支持</span></div></pre></td></tr></table></figure>
+<h3 id="测试伪分布集群">测试伪分布集群</h3>
+<h4 id="启动impala的相关支持">启动impala的相关支持</h4>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="constant">${IMPALA_HOME}</span>/testdata/bin/run-<span class="literal">all</span>.sh</div></pre></td></tr></table></figure>
 
-<p>${IMPALA_HOME}/testdata/bin/run-all.sh</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">相关日志在<span class="variable">${IMPALA_HOME}</span>/cluster_logs/中。</div><div class="line"><span class="comment">####启动impala</span></div></pre></td></tr></table></figure>
+<p>相关日志在${IMPALA_HOME}/cluster_logs/中。</p>
+<h4 id="启动impala">启动impala</h4>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">${IMPALA_HOME}</span>/bin/start-impala-<span class="keyword">cluster</span>.py</div></pre></td></tr></table></figure>
 
-<p>${IMPALA_HOME}/bin/start-impala-cluster.py</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">####测试impala</span></div></pre></td></tr></table></figure>
+<h4 id="测试impala">测试impala</h4>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$cd</span> <span class="variable">${IMPALA_HOME}</span></div><div class="line"><span class="variable">$impala</span>-shell.sh -q”SELECT version()”</div></pre></td></tr></table></figure>
 
-<p>$cd ${IMPALA_HOME}<br>$impala-shell.sh -q”SELECT version()”<br>```</p>
 <p>如下显示，则一切正常。<br><br>    Starting Impala Shell without Kerberos authentication<br>    Connected to localhost:21000<br>    Server version: impalad version 2.2.0-INTERNAL DEBUG (build 47c90e004aecb928a37b926080098d30b96b4330)<br>    Query: select version()<br>    +———————————————————————————————————————————-+<br>    | version()                                                                             |<br>    +———————————————————————————————————————————-+<br>    | impalad version 2.2.0-INTERNAL DEBUG (build 47c90e004aecb928a37b926080098d30b96b4330) |<br>    | Built on Sun, Mar 22 15:22:57 PDT 2015                                                |<br>    +———————————————————————————————————————————-+<br>    Fetched 1 row(s) in 0.05s</p>
 ]]></content>
     <summary type="html">
