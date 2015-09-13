@@ -4,7 +4,7 @@
   <subtitle><![CDATA[A pseudo coder!]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://neverjoe.com/"/>
-  <updated>2015-09-12T09:08:21.212Z</updated>
+  <updated>2015-09-13T01:15:38.975Z</updated>
   <id>http://neverjoe.com/</id>
   
   <author>
@@ -83,7 +83,7 @@
     <link href="http://neverjoe.com/2015/09/08/impala%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/"/>
     <id>http://neverjoe.com/2015/09/08/impala源码安装笔记/</id>
     <published>2015-09-08T02:30:29.000Z</published>
-    <updated>2015-09-12T09:08:11.000Z</updated>
+    <updated>2015-09-13T01:15:35.000Z</updated>
     <content type="html"><![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
 <h2 id="环境">环境</h2>
 <ul>
@@ -116,19 +116,44 @@
 <figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###Maven 3</span></div></pre></td></tr></table></figure>
 
 <p>wget <a href="http://www.interior-dsgn.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz" target="_blank" rel="external">http://www.interior-dsgn.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz</a><br>tar xvf apache-maven-3.0.5-bin.tar.gz &amp;&amp; sudo mv apache-maven-3.0.5 /usr/local</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###bashrc</span></div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">###bashrc</span></div></pre></td></tr></table></figure>
 
 <p>export JAVA_HOME=/usr/lib/jvm/java-7-oracle<br>export IMPALA_HOME=<path to="" impala=""><br>export BOOST_LIBRARYDIR=/usr/lib/x86_64-linux-gnu<br>export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu<br>export LC_ALL=”en_US.UTF-8”<br>export M2_HOME=/usr/local/apache-maven-3.0.5<br>export M2=$M2_HOME/bin<br>export PATH=$M2:$PATH</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###hdfs domain sockets</span></div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">###hdfs domain sockets</span></div></pre></td></tr></table></figure>
 
 <p>sudo mkdir /var/lib/hadoop-hdfs/<br>sudo chown <user> /var/lib/hadoop-hdfs/</user></p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###ssh password-less fro HBase</span></div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="preprocessor">###ssh password-less for HBase</span></div></pre></td></tr></table></figure>
 
 <p>ssh-keygen -t dsa</p>
 <h1 id="Do_not_type_in_any_passkey-_Just_press_enter-">Do not type in any passkey. Just press enter.</h1>
 <p>cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys</p>
-<h2 id="```">```</h2>
-<p>以上完成了源码安装的准备事项。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">-----</div><div class="line">以上完成了源码安装的准备事项。&lt;br/&gt;</div><div class="line"><span class="preprocessor">##源码编译</span></div><div class="line"><span class="preprocessor">###下载源码</span></div></pre></td></tr></table></figure>
+
+<p>git clone  <a href="https://github.com/cloudera/Impala.git" target="_blank" rel="external">https://github.com/cloudera/Impala.git</a></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###检查编译环境变量</span></div></pre></td></tr></table></figure>
+
+<p>cd ${IMPALA_HOME}<br>source bin/impala-config.sh</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">####格式化HIVE Metastore && HDFS　</span></div><div class="line">第一次编译的时，需要清除编译环境和格式化Metastore和HDFS namenode.</div></pre></td></tr></table></figure>
+
+<p>${IMPALA_HOME}/buildall.sh -noclean -skiptests -build_shared_libs -format</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###编译</span></div><div class="line"><span class="preprocessor">####整体编译</span></div></pre></td></tr></table></figure>
+
+<p>${IMPALA_HOME}/buildall.sh -skiptests -build_shared_libs</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">####单独编译backend</span></div></pre></td></tr></table></figure>
+
+<p>$.{IMPALA_HOME}/bin/make_debug.sh [-notests] -build_shared_libs</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">####单独编译frontend</span></div></pre></td></tr></table></figure>
+
+<p>cd ${IMPALA_HOME}/fe &amp;&amp; mvn clean package dependency:copy-dependencies -DskipTests=true</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">###测试伪分布集群</span></div><div class="line"><span class="preprocessor">####启动impala的相关支持</span></div></pre></td></tr></table></figure>
+
+<p>${IMPALA_HOME}/testdata/bin/run-all.sh</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">相关日志在<span class="variable">${IMPALA_HOME}</span>/cluster_logs/中。</div><div class="line"><span class="comment">####启动impala</span></div></pre></td></tr></table></figure>
+
+<p>${IMPALA_HOME}/bin/start-impala-cluster.py</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="preprocessor">####测试impala</span></div></pre></td></tr></table></figure>
+
+<p>$cd ${IMPALA_HOME}<br>$impala-shell.sh -q”SELECT version()”<br>```<br>如下显示，则一切正常。<br><br>    Starting Impala Shell without Kerberos authentication<br>    Connected to localhost:21000<br>    Server version: impalad version 2.2.0-INTERNAL DEBUG (build 47c90e004aecb928a37b926080098d30b96b4330)<br>    Query: select version()<br>    +———————————————————————————————————————————-+<br>    | version()                                                                             |<br>    +———————————————————————————————————————————-+<br>    | impalad version 2.2.0-INTERNAL DEBUG (build 47c90e004aecb928a37b926080098d30b96b4330) |<br>    | Built on Sun, Mar 22 15:22:57 PDT 2015                                                |<br>    +———————————————————————————————————————————-+<br>    Fetched 1 row(s) in 0.05s</p>
 ]]></content>
     <summary type="html">
     <![CDATA[<p>本文是采用git clone源码，部署单机cluster impala集群。目的是debug和围观impala源码，部署生产环境的请绕行。<br></p>
